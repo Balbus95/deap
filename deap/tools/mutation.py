@@ -1,5 +1,6 @@
 import math
 import random
+import numpy as np
 
 from itertools import repeat
 
@@ -47,7 +48,7 @@ def mutGaussian(individual, mu, sigma, indpb):
     return individual,
 
 
-def mutPolynomialBounded(individual, eta, low, up, indpb):
+def mutPolynomialBounded(individual, eta, low, up, indpb): # modified with cast to `int` before return
     """Polynomial mutation as implemented in original NSGA-II algorithm in
     C by Deb.
 
@@ -90,7 +91,8 @@ def mutPolynomialBounded(individual, eta, low, up, indpb):
 
             x = x + delta_q * (xu - xl)
             x = min(max(x, xl), xu)
-            individual[i] = x
+            individual[i] = int(x)
+            # individual[i] = x
     return individual,
 
 
@@ -172,8 +174,44 @@ def mutUniformInt(individual, low, up, indpb):
     return individual,
 
 
+def mutUniformIntAdaptive(individual, low, up, indpb, dfstocks): # modified function of mutUniformInt
+    """Mutate an individual by replacing attributes, with probability *indpb*,
+    by a integer uniformly drawn between *low* and *up* inclusively.
+
+    :param individual: :term:`Sequence <sequence>` individual to be mutated.
+    :param low: The lower bound or a :term:`python:sequence` of
+                of lower bounds of the range from which to draw the new
+                integer.
+    :param up: The upper bound or a :term:`python:sequence` of
+               of upper bounds of the range from which to draw the new
+               integer.
+    :param indpb: Independent probability for each attribute to be mutated.
+    :param stockdf: List of stocks and stock prices (classic csv data from yahoo!finance)
+    :returns: A tuple of one individual.
+    """
+    size = len(individual)
+    uplist=[]
+    if not isinstance(low, Sequence):
+        low = repeat(low, size)
+    elif len(low) < size:
+        raise IndexError("low must be at least the size of individual: %d < %d" % (len(low), size))
+    if not isinstance(up, Sequence):
+        up0=up
+        up = repeat(up, size)
+    elif len(up) < size:
+        raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
+    for i in range(size):
+        up1=int(up0/np.max(dfstocks[i]["Close"]))
+        uplist.append(up1)
+
+    for i, xl, xu in zip(range(size), low, uplist):
+        if random.random() < indpb:
+            individual[i] = random.randint(xl, xu)
+
+    return individual,
+
 ######################################
-# ES Mutations                       #
+## ES Mutations                     ##
 ######################################
 
 def mutESLogNormal(individual, c, indpb):
@@ -183,7 +221,7 @@ def mutESLogNormal(individual, c, indpb):
     \\exp(\\tau_0 \mathcal{N}_0(0, 1)) \\left[ \\sigma_{t-1, 1}\\exp(\\tau
     \mathcal{N}_1(0, 1)), \ldots, \\sigma_{t-1, n} \\exp(\\tau
     \mathcal{N}_n(0, 1))\\right]`, with :math:`\\tau_0 =
-    \\frac{c}{\\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`,
+    \\frac{c}{\mutUniformIntAdaptive\sqrt{2n}}` and :math:`\\tau = \\frac{c}{\\sqrt{2\\sqrt{n}}}`,
     the the individual is mutated by a normal distribution of mean 0 and
     standard deviation of :math:`\\boldsymbol{\sigma}_{t}` (its current
     strategy) then . A recommended choice is ``c=1`` when using a :math:`(10,
@@ -215,4 +253,4 @@ def mutESLogNormal(individual, c, indpb):
 
 
 __all__ = ['mutGaussian', 'mutPolynomialBounded', 'mutShuffleIndexes',
-           'mutFlipBit', 'mutUniformInt', 'mutESLogNormal']
+           'mutFlipBit', 'mutUniformInt', 'mutUniformIntAdaptive', 'mutESLogNormal']

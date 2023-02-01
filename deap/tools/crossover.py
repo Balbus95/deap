@@ -287,7 +287,7 @@ def cxSimulatedBinary(ind1, ind2, eta):
     return ind1, ind2
 
 
-def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
+def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up): # modified with cast to `int` before return
     """Executes a simulated binary crossover that modify in-place the input
     individuals. The simulated binary crossover expects :term:`sequence`
     individuals of floating point numbers.
@@ -350,11 +350,18 @@ def cxSimulatedBinaryBounded(ind1, ind2, eta, low, up):
                 c2 = min(max(c2, xl), xu)
 
                 if random.random() <= 0.5:
-                    ind1[i] = c2
-                    ind2[i] = c1
+                    ind1[i] = int(c2)
+                    ind2[i] = int(c1)
                 else:
-                    ind1[i] = c1
-                    ind2[i] = c2
+                    ind1[i] = int(c1)
+                    ind2[i] = int(c2)
+
+                # if random.random() <= 0.5:
+                #     ind1[i] = c2
+                #     ind2[i] = c1
+                # else:
+                #     ind1[i] = c1
+                #     ind2[i] = c2
 
     return ind1, ind2
 
