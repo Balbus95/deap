@@ -211,7 +211,7 @@ def mutUniformIntAdaptive(individual, low, up, indpb, dfstocks): # modified func
     return individual,
 
 ######################################
-## ES Mutations                     ##
+# ES Mutations                       #
 ######################################
 
 def mutESLogNormal(individual, c, indpb):
