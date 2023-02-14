@@ -174,7 +174,7 @@ def mutUniformInt(individual, low, up, indpb):
     return individual,
 
 
-def mutUniformIntAdaptive(individual, low, up, indpb, dfstocks): # modified function of mutUniformInt
+def mutUniformIntAdaptive(individual, low, up, indpb, dfstocks, offset): # modified function of mutUniformInt
     """Mutate an individual by replacing attributes, with probability *indpb*,
     by a integer uniformly drawn between *low* and *up* inclusively.
 
@@ -201,7 +201,7 @@ def mutUniformIntAdaptive(individual, low, up, indpb, dfstocks): # modified func
     elif len(up) < size:
         raise IndexError("up must be at least the size of individual: %d < %d" % (len(up), size))
     for i in range(size):
-        up1=int(up0/np.max(dfstocks[i]["Close"]))
+        up1=int(up0/np.max(dfstocks[i]["Close"][:offset]))
         uplist.append(up1)
 
     for i, xl, xu in zip(range(size), low, uplist):
